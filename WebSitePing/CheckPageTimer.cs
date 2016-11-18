@@ -1,6 +1,7 @@
 ﻿using HtmlAgilityPack;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Timers;
@@ -24,6 +25,9 @@ namespace WebSitePing
         private WebSiteSettings settings;
         HtmlAgilityPack.HtmlDocument doc;
 
+        Stopwatch stopWatch;
+        
+
         public CheckPageTimer(bool setFullOrShortSettings)
         {
             if (setFullOrShortSettings)
@@ -45,7 +49,7 @@ namespace WebSitePing
             getFullHtmlPageTimer.Interval = oneHour;
             getFullHtmlPageTimer.Start();
 
-
+            stopWatch = new Stopwatch();
         }
 
         private void GetFullHtmlPageTimer_Elapsed(object sender, ElapsedEventArgs e)
@@ -66,9 +70,12 @@ namespace WebSitePing
         {
             try
             {
+                stopWatch.Start();
                 HttpWebRequest request = (HttpWebRequest)WebRequest.Create(settings.Url);
                 HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-                if (response.StatusCode == HttpStatusCode.OK)
+                stopWatch.Stop();
+                TimeSpan sp = stopWatch.Elapsed;
+                if (response.StatusCode == HttpStatusCode.OK && sp.Seconds < settings.Timeout)
                 {
                     Console.WriteLine("HEY IT'S OK");
                 }
