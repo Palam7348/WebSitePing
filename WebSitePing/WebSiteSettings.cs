@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Windows.Forms;
+
 
 namespace WebSitePing
 {
@@ -58,7 +55,38 @@ namespace WebSitePing
 
         public void SendNotification(string type)
         {
-
+            if (type.Equals("ERROR"))
+            {
+                if (notificationSettings.MessageBox)
+                {
+                    MessageBox.Show(errorText);
+                }
+                if (notificationSettings.ConsoleAndSound)
+                {
+                    System.Console.WriteLine(errorText);
+                    System.Console.Beep();
+                }
+                if (notificationSettings.Email != null)
+                {
+                    /* http://stackoverflow.com/questions/449887/sending-e-mail-using-c-sharp */
+                }
+            }
+            if (type.Equals("REPAIRED"))
+            {
+                if (notificationSettings.MessageBox)
+                {
+                    MessageBox.Show(repairedText);
+                }
+                if (notificationSettings.ConsoleAndSound)
+                {
+                    System.Console.WriteLine(repairedText);
+                    System.Console.Beep();
+                }
+                if (notificationSettings.Email != null)
+                {
+                    /* http://stackoverflow.com/questions/449887/sending-e-mail-using-c-sharp */
+                }
+            }
         }
     }
 }

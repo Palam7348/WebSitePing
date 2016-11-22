@@ -19,13 +19,12 @@ namespace WebSitePing
         private int oneHour = 60 * 1000;
 
         private System.Timers.Timer intervalTimer = new System.Timers.Timer();
-        private System.Timers.Timer timeoutTimer = new System.Timers.Timer();
         private System.Timers.Timer getFullHtmlPageTimer = new System.Timers.Timer();
 
         private WebSiteSettings settings;
         HtmlAgilityPack.HtmlDocument doc;
 
-        Stopwatch stopWatch;
+        Stopwatch timeoutTimer;
         
 
         public CheckPageTimer(bool setFullOrShortSettings)
@@ -49,7 +48,7 @@ namespace WebSitePing
             getFullHtmlPageTimer.Interval = oneHour;
             getFullHtmlPageTimer.Start();
 
-            stopWatch = new Stopwatch();
+            timeoutTimer = new Stopwatch();
         }
 
         private void GetFullHtmlPageTimer_Elapsed(object sender, ElapsedEventArgs e)
@@ -70,11 +69,11 @@ namespace WebSitePing
         {
             try
             {
-                stopWatch.Start();
+                timeoutTimer.Start();
                 HttpWebRequest request = (HttpWebRequest)WebRequest.Create(settings.Url);
                 HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-                stopWatch.Stop();
-                TimeSpan sp = stopWatch.Elapsed;
+                timeoutTimer.Stop();
+                TimeSpan sp = timeoutTimer.Elapsed;
                 if (response.StatusCode == HttpStatusCode.OK && sp.Seconds < settings.Timeout)
                 {
                     Console.WriteLine("HEY IT'S OK");
@@ -85,49 +84,69 @@ namespace WebSitePing
                     settings.IncrementErrorCounter();
                     if (settings.NumberOfErrors >= maxErrorsCount) settings.SendNotification(NotificationTypeError);
                 }
-                response.Close();
+                
             }
             catch (Exception ex)
             {
                 settings.IncrementErrorCounter();
                 Console.WriteLine(ex.Message);
-            } 
+            }
+            finally
+            {
+                response.Close();
+            }
            
         }    
 
         private void setFullSetting()
         {
-            WebSiteSettings full;
-            int interval = int.Parse(Console.ReadLine());
-            int timeout = int.Parse(Console.ReadLine());
-            string url = Console.ReadLine();
-            string errorText = Console.ReadLine();
-            string repairedText = Console.ReadLine();
-            Console.Write("Enable messagebox notifications?: (yes/no)");
-            string messageboxAnserw = Console.ReadLine();
+            try
+            {
+                WebSiteSettings full;
+                int interval = int.Parse(Console.ReadLine());
+                int timeout = int.Parse(Console.ReadLine());
+                string url = Console.ReadLine();
+                string errorText = Console.ReadLine();
+                string repairedText = Console.ReadLine();
+                Console.Write("Enable messagebox notifications?: (yes/no)");
+                string messageboxAnserw = Console.ReadLine();
 
-            bool messageBoxNotification = (messageboxAnserw.Equals("yes")) ? true : false;
+                bool messageBoxNotification = (messageboxAnserw.Equals("yes")) ? true : false;
 
-            Console.Write("Enable console and sound notifications?: (yes/no)");
-            string consoleAnserw = Console.ReadLine();
-            bool consoleAndSoundNotification = (consoleAnserw.Equals("yes")) ? true : false;
+                Console.Write("Enable console and sound notifications?: (yes/no)");
+                string consoleAnserw = Console.ReadLine();
+                bool consoleAndSoundNotification = (consoleAnserw.Equals("yes")) ? true : false;
 
-            string email = Console.ReadLine();
+                string email = Console.ReadLine();
 
-            full = new WebSiteSettings(interval, timeout, url, errorText, 
-                repairedText, messageBoxNotification, consoleAndSoundNotification, email);
-            this.settings = full;
+                full = new WebSiteSettings(interval, timeout, url, errorText,
+                    repairedText, messageBoxNotification, consoleAndSoundNotification, email);
+                this.settings = full;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+            
         }
 
         private void setDafaultSetting()
         {
-            WebSiteSettings defaultSettings;
-            /*WHILE TESTING, URL WILL BE DEFAULT lesyadraw.ru*/
-            /*Console.Write("Enter url: ");
-            string url = Console.ReadLine();*/
-            string url = "http://www.lesyadraw.ru/";
-            defaultSettings = new WebSiteSettings(url);
-            this.settings = defaultSettings;
+            try
+            {
+                WebSiteSettings defaultSettings;
+                /*WHILE TESTING, URL WILL BE DEFAULT lesyadraw.ru*/
+                /*Console.Write("Enter url: ");
+                string url = Console.ReadLine();*/
+                string url = "http://www.lesyadraw.ru/";
+                defaultSettings = new WebSiteSettings(url);
+                this.settings = defaultSettings;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+           
         }
     }
 }
